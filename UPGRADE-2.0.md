@@ -1,125 +1,191 @@
-UPGRADE FROM S0RIENDataGridBundle(1.0) to APYDataGridBundle(2.0)
-================================================================
+Voici la documentation complète au format **Markdown (`.md`)**. J'y ai ajouté une section **"Architecture Diagram"** avec un schéma explicatif utilisant la syntaxe `mermaid` (standard supporté par Confluence, GitHub, GitLab, etc.).
 
-## New namespace
+Tu peux copier/coller le bloc ci-dessous directement dans un fichier nommé `README.md` ou dans l'éditeur Confluence.
 
-The DataGridBundle has moved from the S0RIEN repository to the Abhoryo repository and his organisation APY.
-Therefore you should change the namespace of this bundle in your AppKernel.php:
+---
 
-Before: `new Sorien\DataGridBundle\SorienDataGridBundle()`  
-After: `new APY\DataGridBundle\APYDataGridBundle()`
+```markdown
+# Technical Guide: Arize Phoenix Deployment on Domino Data Lab
 
-And in autoload.php
+## 1. Context & Problem Statement
+We deployed **Arize Phoenix** (LLM Tracing & Evaluation) as a WebApp within Domino Data Lab. We encountered two specific infrastructure challenges:
 
-Before: `'Sorien' => __DIR__.'/../vendor/bundles',`  
-After: `'APY' => __DIR__.'/../vendor/bundles',`
+1.  **Authentication Stripping:** The Domino Ingress Controller (Load Balancer) often strips or overwrites the standard `Authorization` header, preventing standard Bearer token authentication.
+2.  **UI Asset Routing:** The Phoenix Web UI (React) failed to load static assets (JS/CSS) because it wasn't aware of the Domino relative sub-paths (`/user/project/...`), resulting in a blank page.
 
-Then in your files change all your `APY` use statements to `APY`
+## 2. Solution Architecture
+To resolve these issues, we implemented a **Sidecar Proxy** pattern.
 
-Change your include block template.
+### Architecture Diagram
 
-Before: `SorienDataGridBundle::blocks.html.twig`  
-After: `'APYDataGridBundle::blocks.html.twig`
+```mermaid
+graph LR
+    Client[Data Scientist<br/>Python Client] -- 1. Header: x-phoenix-api-key --> Ingress(Domino Ingress<br/>Load Balancer)
+    
+    subgraph Domino Compute Environment
+        Ingress -- 2. Passthrough --> Proxy[Sidecar Proxy<br/>Port 8888]
+        Proxy -- 3. Inject: Authorization Bearer --> Phoenix[Phoenix App<br/>Localhost]
+    end
 
-Example:
+    style Proxy fill:#f9f,stroke:#333,stroke-width:2px
+    style Phoenix fill:#ccf,stroke:#333,stroke-width:2px
 
-Before: `use Sorien\DataGridBundle\Grid\Source\Entity;`  
-After: `use APY\DataGridBundle\Grid\Source\Entity;`
+```
 
-You call safely replace all `Sorien` occurences by `APY`.
+**Workflow:**
 
-## New columns types and filters in annotations
+1. **Client:** Sends traces using a custom header `x-phoenix-api-key`. This header is **not** blocked by Domino.
+2. **Proxy:** Intercepts the request, reads the custom header, and converts it into a standard `Authorization: Bearer <token>` header.
+3. **Phoenix:** Receives a fully authenticated request on `localhost`.
+4. **UI Fix:** The startup script injects the `PHOENIX_HOST_ROOT_PATH` environment variable so the UI knows its public URL.
 
-The version 1.0 desn't know the type of the data for the select, sourceselect and range columns.
-In 2.0, these columns don't exist because they are not types of data, but types of filter.
+---
 
-#### Select columns
+## 3. User Guide (For Data Scientists)
 
-Before: `@Grid\Column(type="select", values={"type1"="Type 1", "type2"="Type 2"})`  
-After: `@Grid\Column(type="text", filter="select", selectFrom="values", values={"type1"="Type 1", "type2"="Type 2"})`
+To send traces to this instance, you must configure your client to use the **bypass header** instead of the standard auth method.
 
-See [annotation type attribute](https://github.com/Abhoryo/APYDataGridBundle/blob/master/Resources/doc/columns_configuration/annotations/column_annotation_property.md) for others types.
+### Client Configuration Snippet
 
-#### SourceSelect columns
+When using `phoenix` or `langtrace`, configure your headers as follows:
 
-Before: `@Grid\Column(type="sourceselect")`  
-After: `@Grid\Column(type="text", filter="select", selectFrom="source")` OR `@Grid\Column(type="text", filter="select", selectFrom="query")`
+```python
+import os
+from phoenix.trace.langchain import LangChainInstrumentor
 
-In 2.0, you don't have to declare a repository method `findDistinctByField($field)` to get your values for the selector.
+# 1. Retrieve Configuration
+# Ensure PHOENIX_COLLECTOR_ENDPOINT ends with "v1/traces"
+# Example: [https://domino.url/user/project/r/notebookSession/1234/v1/traces](https://domino.url/user/project/r/notebookSession/1234/v1/traces)
+collector_endpoint = os.getenv("PHOENIX_COLLECTOR_ENDPOINT") + "v1/traces"
+api_key = os.getenv("PHOENIX_API_KEY")
 
-* `query` means that the selectors of the select filter will be populated by the values found in the current search. If no result is found, they will be populated with all values found in the source.
+# 2. Register with the Custom Header
+# We use 'x-phoenix-api-key' to bypass the Domino Ingress filtering.
+instrumentor = LangChainInstrumentor()
+instrumentor.instrument(
+    endpoint=collector_endpoint,
+    headers={
+        "x-phoenix-api-key": api_key  # <--- CRITICAL STEP
+    },
+    project_name="My GenAI Project"
+)
 
-* `source` means that the selectors of the select filter will be populated by all values found in the source.
+print(f"✅ Tracing enabled. Sending traces to: {collector_endpoint}")
 
-#### Range, DateTimeRange and DateRange columns
+```
 
-In 2.0, a operator selector is available. When you select one of the between operators, a new field appears.  
-A second input field appears if you have define `input` in the `filter` attribute.
+---
 
-Before: `@Grid\Column(type="range")`  
-After: `@Grid\Column(type="text", filter="input")` OR `@Grid\Column(type="text", filter="select")`
+## 4. Server-Side Implementation
 
-Before: `@Grid\Column(type="datetimerange")`  
-After: `@Grid\Column(type="datetime", filter="input")` OR `@Grid\Column(type="datetime", filter="select")`
+This section details the scripts used to run the WebApp inside Domino.
 
-Before: `@Grid\Column(type="daterange")`  
-After: `@Grid\Column(type="date", filter="input")` OR `@Grid\Column(type="date", filter="select")`
+### A. `run.sh` (Startup Orchestration)
 
-Range works for the type `number` too.
+This script sets up the environment and manages the two processes (Phoenix & Proxy).
 
-`@Grid\Column(type="number", filter="input")` OR `@Grid\Column(type="number", filter="filter")`
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-## Methods renamed
+# --- 1. Port Configuration ---
+# Port exposed by Domino to the outside world
+PROXY_PORT="${PORT:-8888}"
+# Internal random port for Phoenix (hidden from outside)
+PHOENIX_INTERNAL_PORT="$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')"
 
- * Source::setCallBack rename to manipulateRow and manipulateQuery
+# --- 2. UI Path Correction (Fixes Blank Screen) ---
+# We construct the URL path based on Domino standard variables.
+if [ -n "${DOMINO_PROJECT_OWNER:-}" ] && [ -n "${DOMINO_RUN_ID:-}" ]; then
+    export PHOENIX_HOST_ROOT_PATH="/${DOMINO_PROJECT_OWNER}/${DOMINO_PROJECT_NAME}/r/notebookSession/${DOMINO_RUN_ID}"
+    echo "[INFO] Domino Environment detected. Setting ROOT_PATH to: $PHOENIX_HOST_ROOT_PATH"
+fi
 
-	Before:
+# --- 3. Auth Configuration ---
+export PHOENIX_ENABLE_AUTH=true
+export PHOENIX_SECRET="${PHOENIX_SECRET:-change-me-securely}"
+export PHOENIX_UPSTREAM="[http://127.0.0.1](http://127.0.0.1):${PHOENIX_INTERNAL_PORT}"
 
-	```
-	$source->setCallBack($source::EVENT_PREPARE_ROW, function ($row) {});
-	$source->setCallBack($source::EVENT_PREPARE_QUERY, function ($row) {});
-	```
+# Cleanup trap
+cleanup() { jobs -p | xargs -r kill || true; }
+trap cleanup EXIT
 
-	After:
+# --- 4. Start Phoenix (Background) ---
+# Listens only on localhost for security
+python3 -m phoenix.server.main \
+    --host 127.0.0.1 \
+    --port "${PHOENIX_INTERNAL_PORT}" \
+    serve &
 
-	```
-	$source->manipulateRow(function ($row) {});
-	$source->manipulateQuery(function ($row) {});
-	```
+# Wait for Phoenix to warm up
+sleep 5
 
- * Column::setCallBack rename to manipulateRenderCell
- 
-	Before: `$column->manipulateRenderCell(function ($value, $row, $router) {});`  
-	After: `$column->manipulateRenderCell(function ($value, $row, $router) {});`
+# --- 5. Start Proxy (Foreground) ---
+# Listens on 0.0.0.0 to accept traffic from Domino
+uvicorn proxy:app --host 0.0.0.0 --port "${PROXY_PORT}"
 
- * Grid::initFilter rename to setDefaultFilters
- 
-	Before: `$grid->initFilter(array());`  
-	After: `$grid->setDefaultFilters(array());`
+```
 
- * Grid::initOrder rename to setDefaultOrder
- 
-	Before: `$grid->initOrder($columnId, $order);`  
-	After: `$grid->setDefaultOrder($columnId, $order);`
+### B. `proxy.py` (The Middleware)
 
- * Grid::gridResponse rename to Grid::getGridResponse
+A lightweight FastAPI app that handles header transformation.
 
-	Before: `$grid->gridResponse();`  
-	After: `$grid->getGridResponse();`
- 
- * GridManager::gridManagerResponse rename to GridManager::getGridManagerResponse
+```python
+import os
+import logging
+import httpx
+from fastapi import FastAPI, Request
+from fastapi.responses import Response
 
-	Before: `$grid->gridManagerResponse();`  
-	After: `$grid->getGridManagerResponse();`
+# Config
+UPSTREAM = os.getenv("PHOENIX_UPSTREAM", "[http://127.0.0.1:8899](http://127.0.0.1:8899)").rstrip("/")
+ALT_HEADER = os.getenv("PHOENIX_ALT_AUTH_HEADER", "x-phoenix-api-key").lower()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("proxy")
 
-## Set data on the source instead of the grid
+app = FastAPI()
 
-Before: `$grid->setData($array);`  
-After: `$source->setData($array);`
+def _get_api_key(req: Request) -> str | None:
+    return req.headers.get(ALT_HEADER)
 
-## Pass the grid object to the cell and filter blocks instead of the hash of the grid
+@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+async def proxy(path: str, request: Request):
+    # 1. Build Target URL
+    url = f"{UPSTREAM}/{path}" if path else UPSTREAM
+    
+    # 2. Prepare Headers (Sanitize & Inject Auth)
+    headers = dict(request.headers)
+    headers.pop("host", None)
+    headers["host"] = "127.0.0.1" 
 
-Before: `{{ hash }}`  
-After: `{{ grid.hash }}`
+    # HEADER TUNNELING: Convert custom header to Bearer Token
+    api_key = _get_api_key(request)
+    if api_key:
+        headers["authorization"] = f"Bearer {api_key}"
+        logger.debug("Injected Authorization header from x-phoenix-api-key")
 
-**And Clear your cache!**
+    # 3. Forward Request
+    async with httpx.AsyncClient(verify=False, timeout=60.0) as client:
+        try:
+            resp = await client.request(
+                method=request.method,
+                url=url,
+                params=dict(request.query_params),
+                headers=headers,
+                content=await request.body(),
+            )
+        except Exception as e:
+            logger.error(f"Proxy Error: {e}")
+            return Response(content=f"Proxy Error: {e}", status_code=502)
+
+    # 4. Return Response (Filter hop-by-hop headers)
+    excluded = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+    out_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
+
+    return Response(content=resp.content, status_code=resp.status_code, headers=out_headers)
+
+```
+
+```
+
+```
