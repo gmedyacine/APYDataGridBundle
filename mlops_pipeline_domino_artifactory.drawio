@@ -1,0 +1,209 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- PIPELINE 1 HEADER -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <mxCell id="p1_header" value="Pipeline 1 — Publish internal lib to Artifactory  (rare · lib team)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="20" y="20" width="1200" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- DS / MLOps -->
+    <mxCell id="p1_ds" value="&lt;b&gt;DS / MLOps&lt;/b&gt;&lt;br&gt;develops internal lib&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;utils-weather · lib-scoring&lt;br&gt;datalake-connector&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="20" y="65" width="200" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- GitLab lib repo -->
+    <mxCell id="p1_gitlab" value="&lt;b&gt;GitLab lib repo&lt;/b&gt;&lt;br&gt;git push · MR&lt;br&gt;merge → master&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;setup.py · pyproject.toml&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="280" y="65" width="200" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- GitLab CI -->
+    <mxCell id="p1_ci" value="&lt;b&gt;GitLab CI&lt;/b&gt;&lt;br&gt;python -m build&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;generates wheel .whl&lt;br&gt;twine upload&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="540" y="65" width="200" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- PUSH badge -->
+    <mxCell id="p1_push_badge" value="PUSH" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6d4b9f;strokeColor=#6d4b9f;fontColor=#ffffff;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="795" y="95" width="50" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- Artifactory -->
+    <mxCell id="p1_artifactory" value="&lt;b&gt;Artifactory&lt;/b&gt;&lt;br&gt;private local repo&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;utils-weather==1.2.0&lt;br&gt;stored · versioned&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;align=center;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="850" y="65" width="200" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- P1 arrows -->
+    <mxCell id="p1_arr1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p1_ds" target="p1_gitlab" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p1_arr2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p1_gitlab" target="p1_ci" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p1_arr3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p1_ci" target="p1_artifactory" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- PyPI note -->
+    <mxCell id="p1_note" value="Public packages (pandas · torch · sklearn…) : never pushed — Artifactory mirrors them automatically from PyPI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#bdbdbd;fontSize=10;fontColor=#333333;align=center;" vertex="1" parent="1">
+      <mxGeometry x="20" y="165" width="1030" height="25" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- SEPARATOR -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <mxCell id="sep" value="Pipeline 2 below" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontStyle=2;fontSize=10;fontColor=#999999;" vertex="1" parent="1">
+      <mxGeometry x="450" y="200" width="200" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- PIPELINE 2 HEADER -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <mxCell id="p2_header" value="Pipeline 2 — From workspace to Domino environment build  (daily DS flow)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="20" y="230" width="1200" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- ── PHASE 1 ── -->
+    <mxCell id="ph1_label" value="Phase 1 — Domino workspace · development" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=#f5f5f5;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="20" y="270" width="1200" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_workspace" value="&lt;b&gt;Domino workspace&lt;/b&gt;&lt;br&gt;develop · explore&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;active use case env&lt;br&gt;env-nlp · env-ml · env-cv&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="20" y="298" width="200" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_need" value="&lt;b&gt;New package needed&lt;/b&gt;&lt;br&gt;pip install · test locally&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;validate the need&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="280" y="298" width="200" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_decision" value="system lib&lt;br&gt;or pure Python ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
+      <mxGeometry x="540" y="285" width="180" height="106" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_dockerfile_box" value="→ Dockerfile instructions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="540" y="420" width="250" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_req_box" value="→ requirements.txt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="280" y="420" width="200" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_arr_ws_need" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p2_workspace" target="p2_need" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p2_arr_need_dec" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p2_need" target="p2_decision" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p2_arr_dec_docker" value="system" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="p2_decision" target="p2_dockerfile_box" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p2_arr_dec_req" value="pure Python" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=10;" edge="1" source="p2_decision" target="p2_req_box" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ── PHASE 2 ── -->
+    <mxCell id="ph2_label" value="Phase 2 — git push from workspace · GitLab" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=#f5f5f5;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="20" y="468" width="1200" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_push" value="&lt;b&gt;git push&lt;/b&gt;&lt;br&gt;from workspace&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;feature/ branch&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#bdbdbd;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="20" y="496" width="180" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_mr" value="&lt;b&gt;Merge Request&lt;/b&gt;&lt;br&gt;CI lint · tests&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;peer review DS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#bdbdbd;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="260" y="496" width="180" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_merge" value="&lt;b&gt;Merge → master&lt;/b&gt;&lt;br&gt;Dockerfile + requirements.txt&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;versioned at commit&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#bdbdbd;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="500" y="496" width="250" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_arr_push_mr" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p2_push" target="p2_mr" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p2_arr_mr_merge" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p2_mr" target="p2_merge" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ── PHASE 3 ── -->
+    <mxCell id="ph3_label" value="Phase 3 — Domino builds environment · PULL from Artifactory" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=#f5f5f5;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="20" y="582" width="1200" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="ph3_container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d79b00;strokeWidth=2;dashed=0;" vertex="1" parent="1">
+      <mxGeometry x="20" y="608" width="1200" height="480" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_baseimg" value="&lt;b&gt;Base image&lt;/b&gt;&lt;br&gt;DWS Ingenuity&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;CPU / GPU&lt;br&gt;selected in Domino UI&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="630" width="180" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_docker" value="&lt;b&gt;Dockerfile&lt;/b&gt;&lt;br&gt;from GitLab master&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;system libs&lt;br&gt;pip.conf → Artifactory&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="280" y="630" width="180" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_req" value="&lt;b&gt;requirements.txt&lt;/b&gt;&lt;br&gt;from GitLab master&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;pip install resolved&lt;br&gt;via Artifactory&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="520" y="630" width="180" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_inject" value="&lt;b&gt;Domino injects&lt;/b&gt;&lt;br&gt;USERNAME · TOKEN&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;DS never sees these&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="760" y="630" width="180" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="p2_pull_badge" value="PULL pkgs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d6b656;strokeColor=#d6b656;fontColor=#ffffff;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="540" y="728" width="80" height="24" as="geometry"/>
+    </mxCell>
+
+    <!-- Artifactory container -->
+    <mxCell id="art_container" value="Artifactory — package resolution using Domino-injected credentials" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d6b656;strokeWidth=1;fontSize=10;fontStyle=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="760" width="1160" height="300" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="art_pypi" value="&lt;b&gt;PyPI proxy&lt;/b&gt;&lt;br&gt;pandas · sklearn&lt;br&gt;torch · mlflow · fastapi…&lt;br&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;access : all DS&lt;br&gt;auto mirror from PyPI&lt;br&gt;no manual push&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&apos;font-size:9px;color:#7d4e00&apos;&gt;PULL only&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;align=center;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="60" y="800" width="330" height="240" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="art_private" value="&lt;b&gt;Private local repo&lt;/b&gt;&lt;br&gt;utils-weather&lt;br&gt;lib-scoring · datalake-connector&lt;br&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;access : project rights&lt;br&gt;= same scope as GitLab&lt;br&gt;fed by Pipeline 1&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&apos;font-size:9px;color:#7d4e00&apos;&gt;PUSH (P1) + PULL (P2)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;align=center;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="430" y="800" width="330" height="240" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="art_binaries" value="&lt;b&gt;Binaries repo&lt;/b&gt;&lt;br&gt;CUDA · libgomp · gcc&lt;br&gt;drivers · pre-compiled wheels&lt;br&gt;&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;access : Domino build only&lt;br&gt;write : MLOps / IT&lt;br&gt;DS never accesses this&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&apos;font-size:9px;color:#7d4e00&apos;&gt;PULL only&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;align=center;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="800" y="800" width="330" height="240" as="geometry"/>
+    </mxCell>
+
+    <!-- Phase 3 arrows -->
+    <mxCell id="p3_arr1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p2_baseimg" target="p2_docker" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p3_arr2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p2_docker" target="p2_req" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="p3_arr3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="p2_req" target="p2_inject" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Result envs -->
+    <mxCell id="res_label" value="Result — use case env available in Domino UI" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=#f5f5f5;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="20" y="1100" width="1200" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="res_nlp" value="&lt;b&gt;env-nlp-v3&lt;/b&gt;&lt;br&gt;NLP · LLM · RAG&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;frozen · versioned&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="100" y="1128" width="200" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="res_ml" value="&lt;b&gt;env-ml-v4&lt;/b&gt;&lt;br&gt;tabular ML · scoring&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;frozen · versioned&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="510" y="1128" width="200" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="res_cv" value="&lt;b&gt;env-cv-v2&lt;/b&gt;&lt;br&gt;Computer Vision · GPU&lt;br&gt;&lt;font style=&apos;font-size:10px&apos;&gt;frozen · versioned&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="920" y="1128" width="200" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="res_ds" value="&lt;b&gt;DS selects env in Domino&lt;/b&gt;&lt;br&gt;workspace · training job · reproducible · nothing reinstalled at runtime" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="300" y="1220" width="620" height="50" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
